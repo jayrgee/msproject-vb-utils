@@ -1,6 +1,9 @@
 Option Explicit
 
 Const pjDoNotSave = 0
+Const pjTask = 0
+Const pjResource = 1
+Const pjProject = 2
 
 Dim mppPath
 Dim projectApp
@@ -50,6 +53,7 @@ Info "MPP file opened:  " & mppPath
 
 Set projectFile = projectApp.ActiveProject
 EnumerateProjectProperties projectFile
+EnumerateCustomFields projectApp
 WScript.Echo "------------------"
 CloseActiveProjectWithoutSaving projectApp
 
@@ -108,6 +112,92 @@ Sub EnumerateProjectProperties(ByVal projectFile)
     EnumerateDocumentProperties projectFile, "Built-in document properties", "BuiltinDocumentProperties"
     EnumerateDocumentProperties projectFile, "Custom document properties", "CustomDocumentProperties"
 End Sub
+
+Sub EnumerateCustomFields(ByVal projectApp)
+    WScript.Echo ""
+    WScript.Echo "Custom fields"
+    WScript.Echo "-------------"
+
+    EnumerateCustomFieldsForScope projectApp, "Task", pjTask
+    EnumerateCustomFieldsForScope projectApp, "Resource", pjResource
+    EnumerateCustomFieldsForScope projectApp, "Project", pjProject
+End Sub
+
+Sub EnumerateCustomFieldsForScope(ByVal projectApp, ByVal scopeName, ByVal fieldType)
+    Dim customFieldTypes
+    Dim customFieldType
+    Dim index
+    Dim baseFieldName
+    Dim fieldId
+    Dim customFieldName
+    Dim foundAny
+
+    foundAny = False
+    customFieldTypes = Array("Text", "Number", "Date", "Duration", "Cost", "Flag", "Outline Code")
+
+    For Each customFieldType In customFieldTypes
+        For index = 1 To CustomFieldTypeCount(customFieldType)
+            baseFieldName = customFieldType & CStr(index)
+            fieldId = FieldConstantFor(projectApp, baseFieldName, fieldType)
+
+            If Not IsEmpty(fieldId) Then
+                customFieldName = CustomFieldNameFor(projectApp, fieldId)
+                If Len(customFieldName) > 0 Then
+                    If Not foundAny Then
+                        WScript.Echo ""
+                        WScript.Echo scopeName & " custom fields"
+                        WScript.Echo String(Len(scopeName & " custom fields"), "-")
+                        foundAny = True
+                    End If
+
+                    WScript.Echo baseFieldName & ": " & customFieldName
+                End If
+            End If
+        Next
+    Next
+
+    If Not foundAny Then
+        WScript.Echo ""
+        WScript.Echo scopeName & " custom fields"
+        WScript.Echo String(Len(scopeName & " custom fields"), "-")
+        WScript.Echo "<none>"
+    End If
+End Sub
+
+Function CustomFieldTypeCount(ByVal customFieldType)
+    Select Case customFieldType
+        Case "Text"
+            CustomFieldTypeCount = 30
+        Case "Number", "Flag"
+            CustomFieldTypeCount = 20
+        Case "Date", "Duration", "Cost", "Outline Code"
+            CustomFieldTypeCount = 10
+        Case Else
+            CustomFieldTypeCount = 0
+    End Select
+End Function
+
+Function FieldConstantFor(ByVal projectApp, ByVal baseFieldName, ByVal fieldType)
+    On Error Resume Next
+    FieldConstantFor = projectApp.FieldNameToFieldConstant(baseFieldName, fieldType)
+    If Err.Number <> 0 Or FieldConstantFor = 0 Then
+        FieldConstantFor = Empty
+        Err.Clear
+    End If
+    On Error GoTo 0
+End Function
+
+Function CustomFieldNameFor(ByVal projectApp, ByVal fieldId)
+    On Error Resume Next
+    CustomFieldNameFor = projectApp.CustomFieldGetName(fieldId)
+    If Err.Number <> 0 Or IsNull(CustomFieldNameFor) Then
+        CustomFieldNameFor = ""
+        Err.Clear
+    Else
+        CustomFieldNameFor = Trim(CStr(CustomFieldNameFor))
+    End If
+    On Error GoTo 0
+End Function
 
 Sub EchoNamedProjectProperty(ByVal projectFile, ByVal propertyName)
     Dim value
