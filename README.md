@@ -1,4 +1,4 @@
-# msproject-utils
+# MS Project VB* Utils
 
 Utilities for inspecting Microsoft Project MPP files with VBScript and VBA.
 
