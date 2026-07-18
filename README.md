@@ -1,2 +1,60 @@
 # msproject-utils
-vba vbscript time machine
+
+Utilities for inspecting Microsoft Project MPP files with VBScript and VBA.
+
+## Report summary
+
+Both reports output Microsoft Project file details without saving changes to the MPP file. The report includes:
+
+- File size
+- Project properties
+- Built-in document properties
+- Custom document properties
+- Custom field names
+
+Custom fields are printed in this format:
+
+```text
+Text11: PO Description
+Number12: Physical Percent Complete
+Flag2: Work Order Executed
+```
+
+## Run the VBScript report
+
+Use `vbscript/project-report.vbs` when you want to open an MPP file by path, print the report to the console, and close the file without saving changes.
+
+From PowerShell, set the MPP path and run the script with `cscript`:
+
+```powershell
+$mppFile = "C:\path\to\project.mpp"
+cscript //nologo .\vbscript\project-report.vbs $mppFile
+```
+
+Or pass the path directly:
+
+```powershell
+cscript //nologo .\vbscript\project-report.vbs "C:\path\to\project.mpp"
+```
+
+The script starts or attaches to Microsoft Project, opens the MPP file, prints the report, then closes the MPP without saving changes.
+
+## Run the Immediate Window VBA report
+
+Use `vba/project-report.bas` when the MPP file is already open in Microsoft Project and you want the report printed to the VBA Immediate Window.
+
+1. Open the target `.mpp` file in Microsoft Project.
+2. Press `Alt+F11` to open the VBA editor.
+3. In the VBA editor, select the project for the open MPP file in the Project Explorer.
+4. Select `File` > `Import File...`.
+5. Choose `vba/project-report.bas` from this repo.
+6. Press `Ctrl+G` to show the Immediate Window.
+7. Run the macro `PrintActiveProjectReportToImmediate`.
+
+You can run the macro from `Run` > `Run Sub/UserForm`, or from the Immediate Window with:
+
+```vb
+PrintActiveProjectReportToImmediate
+```
+
+The macro prints the report for the active project.

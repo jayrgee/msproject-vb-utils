@@ -1,4 +1,4 @@
-Attribute VB_Name = "project_report_immediate"
+Attribute VB_Name = "project_report"
 Option Explicit
 
 Private Const FIELD_TYPE_TASK As Long = 0
@@ -10,7 +10,7 @@ Public Sub PrintActiveProjectReportToImmediate()
 
     Set projectFile = ActiveProject
 
-    Info "Running VBA module: project_report_immediate"
+    Info "Running VBA module: project_report"
     Info "MPP file opened:  " & projectFile.FullName
     Info "MPP file size: " & GetFileSize(projectFile.FullName) & " bytes"
 

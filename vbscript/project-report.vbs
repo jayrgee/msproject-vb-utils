@@ -12,7 +12,7 @@ Dim projectFile
 Info "Running script: " & WScript.ScriptFullName
 
 If WScript.Arguments.Count < 1 Then
-    WScript.Echo "Usage: cscript //nologo open-mpp-file.vbs ""C:\path\to\project.mpp"""
+    WScript.Echo "Usage: cscript //nologo project-report.vbs ""C:\path\to\project.mpp"""
     WScript.Quit 1
 End If
 
