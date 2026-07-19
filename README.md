@@ -52,6 +52,18 @@ Or pass the path directly:
 cscript //nologo .\vbscript\project-report.vbs "C:\path\to\project.mpp"
 ```
 
+Optionally, to make `.vbs` files run with `cscript` by default, open an administrator terminal and run:
+
+```powershell
+cscript //H:CScript
+```
+
+After that, you can run the script without explicitly calling `cscript`:
+
+```powershell
+.\vbscript\project-report.vbs "C:\path\to\project.mpp"
+```
+
 The script starts or attaches to Microsoft Project, opens the MPP file, prints the report, then closes the MPP without saving changes.
 
 ## Run the Immediate Window VBA report
