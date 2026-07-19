@@ -9,6 +9,11 @@ Dim mppPath
 Dim projectApp
 Dim projectFile
 
+If LCase(Right(WScript.FullName, 11)) <> "cscript.exe" Then
+    WScript.Echo "Usage: cscript //nologo project-report.vbs ""C:\path\to\project.mpp"""
+    WScript.Quit 1
+End If
+
 Info "Running script: " & WScript.ScriptFullName
 
 If WScript.Arguments.Count < 1 Then
