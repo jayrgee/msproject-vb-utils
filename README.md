@@ -1,6 +1,6 @@
 # MS Project VB* Utils
 
-Utilities for inspecting Microsoft Project MPP files with VBScript and VBA.
+Utilities for inspecting Microsoft Project MPP files with [VBScript](https://en.wikipedia.org/wiki/VBScript) and [VBA](https://en.wikipedia.org/wiki/Visual_Basic_for_Applications).
 
 ## Report summary
 
