@@ -135,6 +135,7 @@ Sub EnumerateCustomFieldsForScope(ByVal projectApp, ByVal scopeName, ByVal field
     Dim baseFieldName
     Dim fieldId
     Dim customFieldName
+    Dim valueCount
     Dim foundAny
 
     foundAny = False
@@ -148,6 +149,8 @@ Sub EnumerateCustomFieldsForScope(ByVal projectApp, ByVal scopeName, ByVal field
             If Not IsEmpty(fieldId) Then
                 customFieldName = CustomFieldNameFor(projectApp, fieldId)
                 If Len(customFieldName) > 0 Then
+                    valueCount = CountCustomFieldValuesForScope(projectApp, fieldId, fieldType)
+
                     If Not foundAny Then
                         WScript.Echo ""
                         WScript.Echo scopeName & " custom fields"
@@ -155,7 +158,7 @@ Sub EnumerateCustomFieldsForScope(ByVal projectApp, ByVal scopeName, ByVal field
                         foundAny = True
                     End If
 
-                    WScript.Echo baseFieldName & ": " & customFieldName
+                    WScript.Echo baseFieldName & ": " & customFieldName & " (" & ValueCountLabel(valueCount) & ")"
                 End If
             End If
         Next
@@ -168,6 +171,79 @@ Sub EnumerateCustomFieldsForScope(ByVal projectApp, ByVal scopeName, ByVal field
         WScript.Echo "<none>"
     End If
 End Sub
+
+Function CountCustomFieldValuesForScope(ByVal projectApp, ByVal fieldId, ByVal fieldType)
+    On Error Resume Next
+    Select Case fieldType
+        Case pjTask
+            CountCustomFieldValuesForScope = CountCustomFieldValuesInItems(projectApp.ActiveProject.Tasks, fieldId)
+        Case pjResource
+            CountCustomFieldValuesForScope = CountCustomFieldValuesInItems(projectApp.ActiveProject.Resources, fieldId)
+        Case pjProject
+            CountCustomFieldValuesForScope = CountCustomFieldValueOnItem(projectApp.ActiveProject.ProjectSummaryTask, fieldId)
+        Case Else
+            CountCustomFieldValuesForScope = 0
+    End Select
+
+    If Err.Number <> 0 Then
+        CountCustomFieldValuesForScope = 0
+        Err.Clear
+    End If
+    On Error GoTo 0
+End Function
+
+Function CountCustomFieldValuesInItems(ByVal items, ByVal fieldId)
+    Dim item
+
+    CountCustomFieldValuesInItems = 0
+    On Error Resume Next
+    For Each item In items
+        CountCustomFieldValuesInItems = CountCustomFieldValuesInItems + CountCustomFieldValueOnItem(item, fieldId)
+    Next
+
+    If Err.Number <> 0 Then
+        CountCustomFieldValuesInItems = 0
+        Err.Clear
+    End If
+    On Error GoTo 0
+End Function
+
+Function CountCustomFieldValueOnItem(ByVal item, ByVal fieldId)
+    Dim customFieldValue
+
+    CountCustomFieldValueOnItem = 0
+    On Error Resume Next
+    If item Is Nothing Then
+        On Error GoTo 0
+        Exit Function
+    End If
+    On Error GoTo 0
+
+    customFieldValue = CustomFieldValueFor(item, fieldId)
+    If Len(customFieldValue) > 0 Then
+        CountCustomFieldValueOnItem = 1
+    End If
+End Function
+
+Function CustomFieldValueFor(ByVal item, ByVal fieldId)
+    On Error Resume Next
+    CustomFieldValueFor = item.GetField(fieldId)
+    If Err.Number <> 0 Or IsNull(CustomFieldValueFor) Then
+        CustomFieldValueFor = ""
+        Err.Clear
+    Else
+        CustomFieldValueFor = Trim(CStr(CustomFieldValueFor))
+    End If
+    On Error GoTo 0
+End Function
+
+Function ValueCountLabel(ByVal valueCount)
+    If valueCount = 1 Then
+        ValueCountLabel = "1 value"
+    Else
+        ValueCountLabel = CStr(valueCount) & " values"
+    End If
+End Function
 
 Function CustomFieldTypeCount(ByVal customFieldType)
     Select Case customFieldType
